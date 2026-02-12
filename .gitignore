@@ -8,5 +8,6 @@ outputs/
 *.key
 *.bak
 *.swp
+*.session
 __pycache__/
 .DS_Store
