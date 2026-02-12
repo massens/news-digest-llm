@@ -1,0 +1,12 @@
+credentials.env
+credentials*.env
+.env
+.env.*
+outputs/
+*.log
+*.pem
+*.key
+*.bak
+*.swp
+__pycache__/
+.DS_Store
