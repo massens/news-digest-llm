@@ -24,15 +24,55 @@ PROJECT_DIR = SCRIPT_DIR.parent
 SESSION_FILE = str(SCRIPT_DIR / "telegram")
 
 
+async def resolve_entity(client, group_name):
+    """Resolve a group name or ID to a Telethon entity.
+
+    Handles numeric IDs by searching dialogs (required for channels/supergroups
+    since Telethon needs the access_hash which is only available from dialogs).
+    """
+    # Try numeric ID: search dialogs for matching entity
+    try:
+        target_id = int(group_name)
+        async for dialog in client.iter_dialogs():
+            if dialog.entity.id == target_id:
+                return dialog.entity
+        raise ValueError(f"No dialog found with ID {target_id}")
+    except ValueError:
+        pass
+
+    # Otherwise treat as username/invite link
+    return await client.get_entity(group_name)
+
+
+def load_credentials_env():
+    """Load credentials.env file, setting any vars not already in environment."""
+    creds_file = PROJECT_DIR / "credentials.env"
+    if not creds_file.exists():
+        return
+    for line in creds_file.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key not in os.environ:
+            os.environ[key] = value
+
+
 def get_config():
-    """Read Telegram config from environment variables."""
+    """Read Telegram config from environment variables (with credentials.env fallback)."""
+    load_credentials_env()
+
     api_id = os.environ.get("TELEGRAM_API_ID")
     api_hash = os.environ.get("TELEGRAM_API_HASH")
     groups_str = os.environ.get("TELEGRAM_GROUPS", "")
 
     if not api_id or not api_hash:
         print("[telegram] ERROR: TELEGRAM_API_ID and TELEGRAM_API_HASH must be set")
-        print("[telegram] Source credentials.env or export them before running")
+        print("[telegram] Add them to credentials.env or export them before running")
         sys.exit(1)
 
     groups = [g.strip() for g in groups_str.split(",") if g.strip()]
@@ -76,7 +116,7 @@ async def fetch_daily(client, groups, output_file):
     messages_out = []
     for group_name in groups:
         try:
-            entity = await client.get_entity(group_name)
+            entity = await resolve_entity(client, group_name)
         except Exception as e:
             print(f"[telegram] WARNING: Could not find group '{group_name}': {e}")
             continue
@@ -123,7 +163,7 @@ async def backfill(client, groups, days, output_dir):
 
     for group_name in groups:
         try:
-            entity = await client.get_entity(group_name)
+            entity = await resolve_entity(client, group_name)
         except Exception as e:
             print(f"[telegram] WARNING: Could not find group '{group_name}': {e}")
             continue
