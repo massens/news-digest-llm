@@ -35,59 +35,71 @@ with open('${STATUS_FILE}', 'w') as f:
 
 # Step 0: Sync X following to Feedbin
 echo "" | tee -a "$LOG_FILE"
-echo "[0/6] Syncing X following list..." | tee -a "$LOG_FILE"
+echo "[0/7] Syncing X following list..." | tee -a "$LOG_FILE"
 if bash "$SCRIPT_DIR/00_sync_x_following.sh" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "[0/6] X sync: OK" | tee -a "$LOG_FILE"
+    echo "[0/7] X sync: OK" | tee -a "$LOG_FILE"
 else
-    echo "[0/6] X sync: FAILED (continuing)" | tee -a "$LOG_FILE"
+    echo "[0/7] X sync: FAILED (continuing)" | tee -a "$LOG_FILE"
     record_status "x_sync" "error" "X following sync failed — new follows may not appear"
     ERRORS=$((ERRORS + 1))
 fi
 
 # Step 1: Fetch Feedbin
 echo "" | tee -a "$LOG_FILE"
-echo "[1/6] Fetching Feedbin..." | tee -a "$LOG_FILE"
+echo "[1/7] Fetching Feedbin..." | tee -a "$LOG_FILE"
 if bash "$SCRIPT_DIR/01_fetch_feedbin.sh" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "[1/6] Feedbin: OK" | tee -a "$LOG_FILE"
+    echo "[1/7] Feedbin: OK" | tee -a "$LOG_FILE"
     record_status "feedbin" "ok"
 else
-    echo "[1/6] Feedbin: FAILED (continuing)" | tee -a "$LOG_FILE"
+    echo "[1/7] Feedbin: FAILED (continuing)" | tee -a "$LOG_FILE"
     record_status "feedbin" "error" "Feedbin fetch failed — RSS entries missing from digest"
     ERRORS=$((ERRORS + 1))
 fi
 
 # Step 2: Fetch HN Best
 echo "" | tee -a "$LOG_FILE"
-echo "[2/6] Fetching HN Best..." | tee -a "$LOG_FILE"
+echo "[2/7] Fetching HN Best..." | tee -a "$LOG_FILE"
 if bash "$SCRIPT_DIR/02_fetch_hn_best.sh" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "[2/6] HN Best: OK" | tee -a "$LOG_FILE"
+    echo "[2/7] HN Best: OK" | tee -a "$LOG_FILE"
     record_status "hn" "ok"
 else
-    echo "[2/6] HN Best: FAILED (continuing)" | tee -a "$LOG_FILE"
+    echo "[2/7] HN Best: FAILED (continuing)" | tee -a "$LOG_FILE"
     record_status "hn" "error" "Hacker News fetch failed — HN section missing"
+    ERRORS=$((ERRORS + 1))
+fi
+
+# Step 2b: Fetch Telegram groups
+echo "" | tee -a "$LOG_FILE"
+echo "[2b/7] Fetching Telegram..." | tee -a "$LOG_FILE"
+if bash "$SCRIPT_DIR/02b_fetch_telegram.sh" 2>&1 | tee -a "$LOG_FILE"; then
+    echo "[2b/7] Telegram: OK" | tee -a "$LOG_FILE"
+    record_status "telegram" "ok"
+else
+    echo "[2b/7] Telegram: FAILED (continuing)" | tee -a "$LOG_FILE"
+    record_status "telegram" "error" "Telegram fetch failed — Telegram messages missing from digest. Session may be expired: run python3 scripts/fetch_telegram.py --auth"
     ERRORS=$((ERRORS + 1))
 fi
 
 # Step 3: Refresh X feeds via RSSHub
 echo "" | tee -a "$LOG_FILE"
-echo "[3/6] Refreshing X feeds..." | tee -a "$LOG_FILE"
+echo "[3/7] Refreshing X feeds..." | tee -a "$LOG_FILE"
 if bash "$SCRIPT_DIR/03_refresh_x_feeds.sh" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "[3/6] X feeds: OK" | tee -a "$LOG_FILE"
+    echo "[3/7] X feeds: OK" | tee -a "$LOG_FILE"
     record_status "x_feeds" "ok"
 else
-    echo "[3/6] X feeds: FAILED (continuing)" | tee -a "$LOG_FILE"
+    echo "[3/7] X feeds: FAILED (continuing)" | tee -a "$LOG_FILE"
     record_status "x_feeds" "error" "X feeds fetch failed — Twitter content missing. Auth token may be expired. Refresh: browser → x.com → DevTools → Application → Cookies → auth_token, then update Railway env var."
     ERRORS=$((ERRORS + 1))
 fi
 
 # Step 4: Generate summary with Claude
 echo "" | tee -a "$LOG_FILE"
-echo "[4/6] Generating summary..." | tee -a "$LOG_FILE"
+echo "[4/7] Generating summary..." | tee -a "$LOG_FILE"
 if bash "$SCRIPT_DIR/04_summarize.sh" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "[4/6] Summary: OK" | tee -a "$LOG_FILE"
+    echo "[4/7] Summary: OK" | tee -a "$LOG_FILE"
     record_status "summarize" "ok"
 else
-    echo "[4/6] Summary: FAILED" | tee -a "$LOG_FILE"
+    echo "[4/7] Summary: FAILED" | tee -a "$LOG_FILE"
     record_status "summarize" "error" "Claude summarization failed"
     ERRORS=$((ERRORS + 1))
     echo "FATAL: Cannot continue without summary. Exiting." | tee -a "$LOG_FILE"
@@ -127,21 +139,21 @@ PYEOF
 
 # Step 5: Post to Slack
 echo "" | tee -a "$LOG_FILE"
-echo "[5/6] Posting to Slack..." | tee -a "$LOG_FILE"
+echo "[5/7] Posting to Slack..." | tee -a "$LOG_FILE"
 if bash "$SCRIPT_DIR/05_post_slack.sh" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "[5/6] Slack: OK" | tee -a "$LOG_FILE"
+    echo "[5/7] Slack: OK" | tee -a "$LOG_FILE"
 else
-    echo "[5/6] Slack: FAILED" | tee -a "$LOG_FILE"
+    echo "[5/7] Slack: FAILED" | tee -a "$LOG_FILE"
     ERRORS=$((ERRORS + 1))
 fi
 
 # Step 6: Send email via Resend
 echo "" | tee -a "$LOG_FILE"
-echo "[6/6] Sending email via Resend..." | tee -a "$LOG_FILE"
+echo "[6/7] Sending email via Resend..." | tee -a "$LOG_FILE"
 if bash "$SCRIPT_DIR/06_post_email.sh" 2>&1 | tee -a "$LOG_FILE"; then
-    echo "[6/6] Email: OK" | tee -a "$LOG_FILE"
+    echo "[6/7] Email: OK" | tee -a "$LOG_FILE"
 else
-    echo "[6/6] Email: FAILED" | tee -a "$LOG_FILE"
+    echo "[6/7] Email: FAILED" | tee -a "$LOG_FILE"
     ERRORS=$((ERRORS + 1))
 fi
 

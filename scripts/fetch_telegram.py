@@ -109,9 +109,13 @@ async def list_groups(client):
 
 
 async def fetch_daily(client, groups, output_file):
-    """Fetch last 24h of messages from configured groups."""
+    """Fetch last 7 days of messages from configured groups.
+
+    We pull 7 days (not 24h) so the summarizer has enough context
+    to identify recurring/hot topics and explain them properly.
+    """
     await client.start()
-    since = datetime.now(timezone.utc) - timedelta(hours=24)
+    since = datetime.now(timezone.utc) - timedelta(days=7)
 
     messages_out = []
     for group_name in groups:
@@ -143,7 +147,7 @@ async def fetch_daily(client, groups, output_file):
                 f"content: {text}"
             )
             count += 1
-        print(f"[telegram] {group_title}: {count} messages (last 24h)")
+        print(f"[telegram] {group_title}: {count} messages (last 7 days)")
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text("\n".join(messages_out))

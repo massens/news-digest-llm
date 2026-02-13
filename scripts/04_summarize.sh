@@ -60,6 +60,14 @@ if [ -f "$RAW_DIR/x_feeds.txt" ]; then
     echo "" >> "$TEMP_PROMPT"
 fi
 
+if [ -f "$RAW_DIR/telegram.txt" ]; then
+    TG_SIZE=$(wc -c < "$RAW_DIR/telegram.txt" | tr -d ' ')
+    echo "[summarize] Including telegram.txt ($TG_SIZE bytes)"
+    echo "=== TELEGRAM GROUP MESSAGES (AIrtesans - last 7 days for context) ===" >> "$TEMP_PROMPT"
+    cat "$RAW_DIR/telegram.txt" >> "$TEMP_PROMPT"
+    echo "" >> "$TEMP_PROMPT"
+fi
+
 PROMPT_SIZE=$(wc -c < "$TEMP_PROMPT" | tr -d ' ')
 echo "[summarize] Total prompt: $PROMPT_SIZE bytes"
 echo "[summarize] Running Claude CLI (this may take 60-120 seconds)..."
