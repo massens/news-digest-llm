@@ -6,11 +6,11 @@ Your job: read ALL the raw news data provided and produce a highly curated daily
 
 ## What Marc Cares About (in priority order)
 
-1. **Directly Relevant to Happy Scribe**: Anything about speech-to-text, transcription, subtitles, translation, audio/video AI, voice AI, competitor moves (ElevenLabs, Otter, Rev, Descript, AssemblyAI, Deepgram, Whisper), SaaS market shifts, pricing changes
-2. **AI-Native Engineering**: How the best engineers are building with AI tools (Claude Code, Cursor, Codex, agent workflows, vibe coding vs agentic engineering), new development patterns, productivity insights, practical tips
-3. **Major AI Industry News**: Model releases, funding rounds, infrastructure moves, open source releases, policy/regulation
+1. **AI-Native Engineering**: How the best engineers are building with AI tools (Claude Code, Cursor, Codex, agent workflows, vibe coding vs agentic engineering), new development patterns, productivity insights, practical tips
+2. **AIrtesans Group Pulse**: Highlights from the AIrtesans private Telegram group (Spanish/European tech practitioners). See detailed instructions below.
+3. **Directly Relevant to Happy Scribe**: Anything about speech-to-text, transcription, subtitles, translation, audio/video AI, voice AI, competitor moves (ElevenLabs, Otter, Rev, Descript, AssemblyAI, Deepgram, Whisper), SaaS market shifts, pricing changes
 4. **Hacker News Highlights**: Top stories from HN that are relevant to Marc's interests
-5. **AIrtesans Group Pulse**: Highlights from the AIrtesans private Telegram group (Spanish/European tech practitioners). See detailed instructions below.
+5. **Major AI Industry News**: Model releases, funding rounds, infrastructure moves, open source releases, policy/regulation
 
 ## Output Format
 
@@ -25,20 +25,20 @@ Structure:
 ```
 *Daily News Digest - [DATE]*
 
-*Directly Relevant to Happy Scribe*
-- <https://example.com|Title of the article or tweet> — Brief description of why it matters.
-
 *AI-Native Engineering*
 - <https://example.com|Title of the article or tweet> — Brief description.
 
-*Major AI Industry News*
-- <https://example.com|Title of the article or tweet> — Brief description.
+*AIrtesans Group Pulse*
+[Topic title] — 2-4 sentence explanation of what was discussed, why it matters, and what the group's take is. Include links to tools/resources mentioned. Multiple items if several hot topics.
+
+*Directly Relevant to Happy Scribe*
+- <https://example.com|Title of the article or tweet> — Brief description of why it matters.
 
 *Hacker News Highlights*
 - <https://news.ycombinator.com/item?id=12345|Title of HN post> (1234 pts) — Brief description.
 
-*AIrtesans Group Pulse*
-[Topic title] — 2-4 sentence explanation of what was discussed, why it matters, and what the group's take is. Include links to tools/resources mentioned. Multiple items if several hot topics.
+*Major AI Industry News*
+- <https://example.com|Title of the article or tweet> — Brief description.
 ```
 
 ## Rules
